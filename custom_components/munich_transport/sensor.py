@@ -4,7 +4,7 @@ import logging
 from typing import Optional, Any
 import asyncio
 
-from mvg import MvgApi, MvgApiError
+from mvg import MvgApi, MvgApiError, TransportType
 import voluptuous as vol
 
 from homeassistant.core import HomeAssistant
@@ -114,8 +114,9 @@ class TransportSensor(SensorEntity):
 
         departures = asyncio.run(departures_async(self.station_name, 
                                                   limit=20,
-                                                  offset=self.walking_time))
-
+                                                  offset=self.walking_time,
+                                                  transport_types=[TransportType.REGIONAL_BUS]))
+        
         departures = list(filter(lambda d: not bool(d['cancelled']), departures))
 
         _LOGGER.debug(f"OK: departures for {self.station_name}: {departures}")
