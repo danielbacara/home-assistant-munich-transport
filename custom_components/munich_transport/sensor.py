@@ -1,7 +1,8 @@
 """Munich public transport (MVG) integration."""
 from __future__ import annotations
 import logging
-from typing import Optional
+from typing import Optional, Any
+import asyncio
 
 from mvg import MvgApi, MvgApiError
 import voluptuous as vol
@@ -101,22 +102,23 @@ class TransportSensor(SensorEntity):
         self.departures = self.fetch_departures()
 
     def fetch_departures(self) -> Optional[list[Departure]]:
-        try:
-            station = MvgApi.station(self.station_name)
-        except MvgApiError as e:
-            _LOGGER.error("Could not find %s: %s" % (self.station_name, e))
-            return None
 
-        _LOGGER.debug(f"OK: station ID for {self.station_name}: {station}")
+        async def departures_async(station, *args, **kwargs ) -> list[dict[str, Any]]:
+            try:
+                station = await MvgApi.station_async(station)
+            except MvgApiError as e:
+                _LOGGER.error("Could not find %s: %s" % (self.station_name, e))        
+            
+            departures = MvgApi.departures_async(station['id'], *args, **kwargs)
+            return await departures
 
-        mvg_api = MvgApi(station['id'])
-        departures = mvg_api.departures(
-            limit=20,
-            offset=self.walking_time,
-        )
+        departures = asyncio.run(departures_async(self.station_name, 
+                                                  limit=20,
+                                                  offset=self.walking_time))
+
         departures = list(filter(lambda d: not bool(d['cancelled']), departures))
 
-        _LOGGER.debug(f"OK: departures for {station['name']}: {departures}")
+        _LOGGER.debug(f"OK: departures for {self.station_name}: {departures}")
 
         # convert api data into objects
         unsorted = [Departure.from_dict(departure) for departure in departures]
