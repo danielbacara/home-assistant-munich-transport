@@ -12,6 +12,7 @@ CONF_TYPE_SUBURBAN = "S-Bahn"
 CONF_TYPE_SUBWAY = "U-Bahn"
 CONF_TYPE_TRAM = "Tram"
 CONF_TYPE_BUS = "Bus"
+CONF_TYPE_REGIONALBUS = "Regionalbus"
 
 TRANSPORT_TYPE_VISUALS = {
     CONF_TYPE_SUBURBAN: {
@@ -30,6 +31,11 @@ TRANSPORT_TYPE_VISUALS = {
         "color": "#E30613",
     },
     CONF_TYPE_BUS: {
+        "code": "BUS",
+        "icon": "mdi:bus",
+        "color": "#133B4B"
+    },
+    CONF_TYPE_REGIONALBUS: {
         "code": "BUS",
         "icon": "mdi:bus",
         "color": "#133B4B"
